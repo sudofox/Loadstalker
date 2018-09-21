@@ -1,6 +1,8 @@
 #!/bin/bash
 # sudofox/Loadstalker
+# https://github.com/sudofox/Loadstalker
 # by sudofox aka aburk
+
 
 # Load average threshold
 THRESH=4
@@ -200,7 +202,13 @@ if [ "$PANELTYPE" == "cPanel" ]; then
 	PHPCPU=`echo "$TOP_SBN1"|awk '$12~/(ls|)[p]hp+(-cgi|5|$)/ {cpu+=$9}END{printf"%.2f",cpu}'`
 	PHPMEM=`echo "$PS_AUX"|awk '$11~/(ls|)[p]hp+(-cgi|5|)$/ {sum+=$6} END {print int(sum)}'`
 
-	APACHEPORTS=$(awk -F: '/^([[:space:]]{1,}|)Listen [0-9]/ {print int($2)}' /etc/apache2/conf/httpd.conf|sort|uniq)
+        if [ -e "/etc/cpanel/ea4/is_ea4" ]; then
+		# EA4 httpd.conf location
+		APACHEPORTS=$(awk -F: '/^([[:space:]]{1,}|)Listen [0-9]/ {print int($2)}' /etc/apache2/conf/httpd.conf|sort|uniq)
+        else
+		# EA3 httpd.conf location
+		APACHEPORTS=$(awk -F: '/^([[:space:]]{1,}|)Listen [0-9]/ {print int($2)}' /etc/httpd/conf/httpd.conf|sort|uniq)
+        fi
 
 elif [ "$PANELTYPE" == "Plesk" ]; then
 
