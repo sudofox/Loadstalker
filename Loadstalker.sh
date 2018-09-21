@@ -3,14 +3,15 @@
 # by sudofox aka aburk
 
 # Load average threshold
-
 THRESH=4
 
 # If an email address is placed here, we will send an email to it with the Loadstalker info after we finish (leave as blank to disable)
-
 EMAIL=""
-# Development mode: always trigger, regardless of load average
 
+# Number of entries to include for each section
+ENTRIES=20
+
+# Development mode: always trigger, regardless of load average
 DEVMODE=false
 
 if [ "$DEVMODE" = true ]; then
@@ -89,7 +90,7 @@ do_swap_check () {
 	SWAPCHECK=`swapon -s|wc -c`
 	printf "\n=== Top Swap Users ===\n"
 	if [ $SWAPCHECK -gt 0 ]; then
-		echo "$(echo Process Swap; for file in /proc/*/status; do awk '/Name|VmSwap/ {printf $2 " " $3}END {print ""}' $file; done|sort -k2 -nr|head -n20|awk '{print $1 " " int($2/1024) "MB"}')"|column -t|grep -v 0MB
+		echo "$(echo Process Swap; for file in /proc/*/status; do awk '/Name|VmSwap/ {printf $2 " " $3}END {print ""}' $file; done|sort -k2 -nr|head -n"$ENTRIES"|awk '{print $1 " " int($2/1024) "MB"}')"|column -t|grep -v 0MB
 		echo Total: $(free -m|awk '$1=="Swap:"{print $3 "MB"}')
 	else
 		echo "Swap is disabled."
@@ -99,7 +100,7 @@ do_swap_check () {
 do_top_cpu () {
 
 	printf "\n=== Top CPU Users ===\n"
-	echo "$TOP_SBN1"|head -n26|tail -n20|awk '$9 !~/0.0/'
+	echo "$TOP_SBN1"|head -n$(($ENTRIES+6))|tail -n$ENTRIES|awk '$9 !~/0.0/'
 }
 
 do_mysql () {
@@ -118,7 +119,7 @@ do_mysql () {
 do_resmem () {
 
 	printf "=== Processes with highest resident memory usage ===\n\nRSS\tVSZ\tPID\tCMD\n"
-	ps h -Ao rss,vsz,pid,cmd |sort -rn|head -n20|awk '{print int($1/1000)"M\t"int($2/1000)"M\t"$3"\t"$4}'
+	ps h -Ao rss,vsz,pid,cmd |sort -rn|head -n$ENTRIES|awk '{print int($1/1000)"M\t"int($2/1000)"M\t"$3"\t"$4}'
 	printf "\nTotal resident memory usage: "
 	ps h -Ao rsz,vsz,cmd | sort -rn | awk '{total = total + $1 }END{print int(total/1000) "M"}'
 }
@@ -144,7 +145,7 @@ do_list_apacheconns () {
         for port in $APACHEPORTS; do
 
                 printf "\n=== Top open connections to port $port ===\n"
-                lsof -nP -i:$port|grep ESTABLISHED|awk -F "->" '{print $2}'|awk -F: '{print $1}'|sort|egrep -v "^$"|uniq -c|sort -nr|head
+                lsof -nP -i:$port|grep ESTABLISHED|awk -F "->" '{print $2}'|awk -F: '{print $1}'|sort|egrep -v "^$"|uniq -c|sort -nr|head -n$ENTRIES
         done
 
 }
