@@ -200,7 +200,7 @@ if [ "$PANELTYPE" == "cPanel" ]; then
 	PHPCPU=`echo "$TOP_SBN1"|awk '$12~/(ls|)[p]hp+(-cgi|5|$)/ {cpu+=$9}END{printf"%.2f",cpu}'`
 	PHPMEM=`echo "$PS_AUX"|awk '$11~/(ls|)[p]hp+(-cgi|5|)$/ {sum+=$6} END {print int(sum)}'`
 
-	APACHEPORTS=$(awk -F: '/^([[:space:]]{1,}|)Listen [0-9]/ {print int($2)}' /etc/httpd/conf/httpd.conf|sort|uniq)
+	APACHEPORTS=$(awk -F: '/^([[:space:]]{1,}|)Listen [0-9]/ {print int($2)}' /etc/apache2/conf/httpd.conf|sort|uniq)
 
 elif [ "$PANELTYPE" == "Plesk" ]; then
 
