@@ -6,6 +6,9 @@
 
 THRESH=4
 
+# If an email address is placed here, we will send an email to it with the Loadstalker info after we finish (leave as blank to disable)
+
+EMAIL=""
 # Development mode: always trigger, regardless of load average
 
 DEVMODE=false
@@ -34,9 +37,6 @@ else
 fi
 
 COLUMNS=512
-# disabled until I can rewrite the whole email bit to be actually useful
-#SUBJECT="Loadstalker on $HOSTNAME tripped. Please check it out."
-#EMAILMESSAGE="/tmp/emailmessage.txt"
 
 #detect system information needed to process
 # TODO: Look into CloudLinux servers to make loadstalker compatible
@@ -219,14 +219,7 @@ fi
 
 echo loadstalker tripped, dumping info to $DIR/$FILE >> $DIR/checklog
 echo `date +%F.%H.%M` > $DIR/$FILE
-#email disabled until i actually make it useful
-#echo "loadstalker on $HOSTNAME tripped. Go take a look!" > $EMAILMESSAGE
 chmod 600 $DIR/$FILE
-
-#email (optional, set your email address and uncomment the lines below)
-#EMAIL="user@example.com"
-#/bin/mail -s "$SUBJECT" "$EMAIL" < $EMAILMESSAGE
-
 
 	############## If cPanel ##############
 
@@ -433,4 +426,12 @@ Scoreboard Key:
 
 
 	fi
+
+# Email Notification
+# If EMAIL is not an empty string, then send an email to the listed address.
+
+if [[ ! -z $EMAIL ]]; then
+	SUBJECT="Loadstalker on $(hostname) -  $(uptime|grep -Po "load.+?(?=,)")"
+        /usr/bin/env mail -s "$SUBJECT" "$EMAIL" < $DIR/$FILE
+fi
 
